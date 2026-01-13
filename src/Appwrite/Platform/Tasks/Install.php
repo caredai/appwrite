@@ -32,10 +32,11 @@ class Install extends Action
             ->param('image', 'appwrite', new Text(0), 'Main appwrite docker image', true)
             ->param('interactive', 'Y', new Text(1), 'Run an interactive session', true)
             ->param('no-start', false, new Boolean(true), 'Run an interactive session', true)
+            ->param('database', 'mariadb', new Text(0), 'Database to use (mariadb|postgresql)', true)
             ->callback($this->action(...));
     }
 
-    public function action(string $httpPort, string $httpsPort, string $organization, string $image, string $interactive, bool $noStart): void
+    public function action(string $httpPort, string $httpsPort, string $organization, string $image, string $interactive, bool $noStart, string $database): void
     {
         $config = Config::getParam('variables');
         $defaultHTTPPort = '80';
@@ -169,6 +170,10 @@ class Install extends Action
                     continue;
                 }
             }
+            if ($var['name'] === '_APP_DB_ADAPTER' && $data !== false) {
+                $input[$var['name']] = $database;
+                continue;
+            }
             if (!$var['required'] || !Console::isInteractive() || $interactive !== 'Y') {
                 $input[$var['name']] = $var['default'];
                 continue;
@@ -191,6 +196,15 @@ class Install extends Action
             }
         }
 
+        $database = $input['_APP_DB_ADAPTER'];
+        if ($database === 'postgresql') {
+            $input['_APP_DB_HOST'] = 'postgresql';
+            $input['_APP_DB_PORT'] = 5432;
+        } elseif ($database === 'mariadb') {
+            $input['_APP_DB_HOST'] = 'mariadb';
+            $input['_APP_DB_PORT'] = 3306;
+        }
+
         $templateForCompose = new View(__DIR__ . '/../../../../app/views/install/compose.phtml');
         $templateForEnv = new View(__DIR__ . '/../../../../app/views/install/env.phtml');
 
@@ -199,7 +213,8 @@ class Install extends Action
             ->setParam('httpsPort', $httpsPort)
             ->setParam('version', APP_VERSION_STABLE)
             ->setParam('organization', $organization)
-            ->setParam('image', $image);
+            ->setParam('image', $image)
+            ->setParam('database', $database);
 
         $templateForEnv->setParam('vars', $input);
 
