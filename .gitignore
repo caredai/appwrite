@@ -18,3 +18,10 @@ dev/yasd_init.php
 Makefile
 appwrite.config.json
 /.zed/
+
+console/
+proxy/
+executor/
+open-runtimes/
+open-runtimes-k8s-executor/
+orchestration/

@@ -144,6 +144,24 @@ $register->set('realtimeLogger', function () {
     return new Logger($adapter);
 });
 
+class RedisConnection extends Queue\Connection\Redis {
+    protected function getRedis(): \Redis {
+        if ($this->redis) {
+            return $this->redis;
+        }
+
+        $this->redis = new \Redis();
+
+        $this->redis->connect($this->host, $this->port);
+
+        if ($this->password) {
+            $this->redis->auth($this->password);
+        }
+
+        return $this->redis;
+    }
+}
+
 $register->set('pools', function () {
     $group = new Group();
 
@@ -318,7 +336,7 @@ $register->set('pools', function () {
                     case 'publisher':
                     case 'consumer':
                         return match ($dsn->getScheme()) {
-                            'redis' => new Queue\Broker\Redis(new Queue\Connection\Redis($dsn->getHost(), $dsn->getPort())),
+                            'redis' => new Queue\Broker\Redis(new RedisConnection($dsn->getHost(), $dsn->getPort(), $dsn->getUser(), $dsn->getPassword())),
                             default => null
                         };
                     case 'cache':

@@ -201,7 +201,9 @@ function createDatabase(App $app, string $resourceKey, string $dbName, array $co
         Console::info("  └── Creating database: $dbName...");
         $database->create();
     } catch (\Exception $e) {
-        Console::info("  └── Skip: metadata table already exists");
+        Console::info("  └── Skip: metadata table already exists: " . $e->getMessage());
+        Console::info("Stack trace:");
+        Console::info($e->getTraceAsString());
     }
 
     // Process collections
