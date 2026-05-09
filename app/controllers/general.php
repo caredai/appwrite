@@ -737,7 +737,7 @@ function router(Http $utopia, Database $dbForPlatform, callable $getProjectDB, S
         $body = $execution['responseBody'] ?? '';
 
         $contentType = 'text/plain';
-        foreach ($executionResponse['headers'] as $name => $values) {
+        foreach (($executionResponse['headers'] ?? []) as $name => $values) {
             if (\strtolower($name) === 'content-type') {
                 $contentType = \is_array($values) ? $values[0] : $values;
                 continue;

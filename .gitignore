@@ -27,3 +27,9 @@ docker-compose.web-installer.yml
 .env.web-installer
 docker-compose.web-installer.yml.**.backup
 tests/playwright/screenshots
+console/
+proxy/
+executor/
+open-runtimes/
+open-runtimes-k8s-executor/
+orchestration/
