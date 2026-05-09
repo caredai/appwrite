@@ -74,9 +74,11 @@ class LetsEncrypt implements Adapter
         ]);
 
         // Save configuration into Traefik using our new cert files
+        /*
         if (!\file_put_contents(APP_STORAGE_CONFIG . '/' . $domain . '.yml', $config)) {
             throw new Exception('Failed to save Traefik configuration.');
         }
+        */
 
         $certPath = APP_STORAGE_CERTIFICATES . '/' . $domain . '/cert.pem';
         $certData = openssl_x509_parse(file_get_contents($certPath));
