@@ -2,6 +2,8 @@
 
 Self-hosted Backend-as-a-Service platform. Hybrid monolithic-microservice architecture built with PHP 8.3+ on Swoole, delivered as Docker containers.
 
+For Cared adaptation branches such as `cl-1.9.0-x-cared`, read `CARED.md` before making or reviewing changes. `CARED.zh-CN.md` is the Chinese reference version.
+
 ## Commands
 
 | Command | Purpose |

@@ -67,6 +67,7 @@ class Create extends Base
             ->param('name', null, new Text(128), 'Key name. Max length: 128 chars.')
             ->param('scopes', [], new ArrayList(new WhiteList(array_keys(Config::getParam('projectScopes')), true), APP_LIMIT_ARRAY_PARAMS_SIZE), 'Key scopes list. Maximum of ' . APP_LIMIT_ARRAY_PARAMS_SIZE . ' scopes are allowed.', optional: false, enum: new Enum(name: 'ProjectKeyScopes'))
             ->param('expire', null, new Nullable(new Datetime()), 'Expiration time in [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format. Use null for unlimited expiration.', true)
+            ->param('secret', null, new Nullable(new Text(512)), 'Key secret. Must match format: ' . API_KEY_STANDARD . '_<256 hex chars>. If omitted, a secret is generated automatically.', true)
             ->inject('response')
             ->inject('queueForEvents')
             ->inject('dbForPlatform')
@@ -80,6 +81,7 @@ class Create extends Base
         string $name,
         array $scopes,
         ?string $expire,
+        ?string $secret,
         Response $response,
         QueueEvent $queueForEvents,
         Database $dbForPlatform,
@@ -87,6 +89,16 @@ class Create extends Base
         Authorization $authorization,
     ) {
         $keyId = ($keyId == 'unique()') ? ID::unique() : $keyId;
+        $expectedPrefix = API_KEY_STANDARD . '_';
+
+        if ($secret !== null) {
+            $hexPart = \substr($secret, \strlen($expectedPrefix));
+            if (\strpos($secret, $expectedPrefix) !== 0 || \strlen($hexPart) !== 256 || !\ctype_xdigit($hexPart)) {
+                throw new Exception(Exception::GENERAL_ARGUMENT_INVALID, 'Secret must match format: ' . API_KEY_STANDARD . '_<256 hex characters>');
+            }
+        }
+
+        $keySecret = $secret ?? (API_KEY_STANDARD . '_' . \bin2hex(\random_bytes(128)));
 
         $key = new Document([
             '$id' => $keyId,
@@ -99,7 +111,7 @@ class Create extends Base
             'expire' => $expire,
             'sdks' => [],
             'accessedAt' => null,
-            'secret' => API_KEY_STANDARD . '_' . \bin2hex(\random_bytes(128)),
+            'secret' => $keySecret,
         ]);
 
         try {

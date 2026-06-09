@@ -236,6 +236,13 @@ class V24 extends Migration
                     } catch (Throwable $th) {
                         Console::warning('Failed to create attributes "' . \implode(', ', $attributes) . "\" in collection {$id}: {$th->getMessage()}");
                     }
+                    foreach (['providerBranches', 'providerPaths'] as $attribute) {
+                        try {
+                            $this->createAttributeFromCollection($this->dbForProject, $id, $attribute);
+                        } catch (Throwable $th) {
+                            Console::warning("Failed to create attribute \"{$attribute}\" in collection {$id}: {$th->getMessage()}");
+                        }
+                    }
                     $this->dbForProject->purgeCachedCollection($id);
                     break;
 
@@ -250,6 +257,13 @@ class V24 extends Migration
                         $this->createAttributesFromCollection($this->dbForProject, $id, $attributes);
                     } catch (Throwable $th) {
                         Console::warning('Failed to create attributes "' . \implode(', ', $attributes) . "\" in collection {$id}: {$th->getMessage()}");
+                    }
+                    foreach (['providerBranches', 'providerPaths'] as $attribute) {
+                        try {
+                            $this->createAttributeFromCollection($this->dbForProject, $id, $attribute);
+                        } catch (Throwable $th) {
+                            Console::warning("Failed to create attribute \"{$attribute}\" in collection {$id}: {$th->getMessage()}");
+                        }
                     }
                     $this->dbForProject->purgeCachedCollection($id);
                     break;
